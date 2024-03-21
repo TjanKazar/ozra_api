@@ -14,8 +14,8 @@ cur = conn.cursor()
 app = Flask("ozraAPI")
 
 
-
-@app.get("/Tekmovanja")
+    
+@app.get("/asdf")
 def get_tekmovanja():
         cur.execute("SELECT * FROM Tekmovanje")
         rows = cur.fetchall()
@@ -28,6 +28,8 @@ def get_tekmovanja():
                     "results": row[3], 
             })
         return jsonify(result)
+
+
 
 @app.get('/rezultati')
 def get_rezultati():
@@ -121,10 +123,8 @@ def get_tekmovanje(id):
             }
     return jsonify(result)
 
-
 @app.post("/rezultatpost")
 def post_rezultat():
-    try:
         data = request.get_json()
 
         swim = data.get('swim')
@@ -159,14 +159,9 @@ def post_rezultat():
         conn.commit()
 
         return jsonify({"message": "Result added successfully"}), 201  
-    except Exception as e:
-        conn.rollback()
-        return jsonify({"error": "sorry boss something happened"}), 500
 
-
-@app.post('/tekmovanjepost')
+@app.post('/Tekmovanjepost')
 def post_tekmovanje():
-    try:
         data = request.get_json()
         competition_name = data.get('competition_name')
         year = data.get('year')
@@ -179,41 +174,71 @@ def post_tekmovanje():
         conn.commit()
 
         return jsonify({"message": "Result added successfully"}), 201  
-    except Exception as e:
-        conn.rollback()
-        return jsonify({"error": str(e)}), 500
-
 
 
 @app.delete('/tekmovanjedelete')
 def delete_tekmovanje():
-    try:
         data = request.get_json()
-        id = data.get("id")
+        id = data.get('id')
         cur.execute("DELETE FROM tekmovanje WHERE id = %s", (id,))
         
         conn.commit()
 
         return jsonify({"message": "Result deleted successfully"}), 204  
-    except Exception as e:
-        conn.rollback()
-        return jsonify({"error": str(e)}), 500
+
     
 @app.delete('/rezultatdelete')
 def delete_rezultat():
-    try:
         data = request.get_json()
-        id = data.get("id")
+        id = data.get('id')
         cur.execute("DELETE FROM rezultat WHERE id = %s", (id,))
         
         conn.commit()
 
         return jsonify({"message": "Result deleted successfully"}), 204  
-    except Exception as e:
-        conn.rollback()
-        return jsonify({"error": str(e)}), 500
 
+@app.put('/Tekmovanjeput')
+def put_tekmovanje():
+        data = request.get_json()
+        id = data.get('id')
+        competition_name = data.get('competition_name')
+        year = data.get('year')
+        results = data.get('results')
 
+        cur.execute("UPDATE tekmovanje SET competition_name = %s, year = %s, results = %s WHERE id = %s", (competition_name, year, results, id ))
+        conn.commit()
+        return jsonify({"message": "Result changed successfully"}), 200
+
+@app.put('/Rezultatput')
+def put_rezultat():
+        data = request.get_json()
+        id = data.get('id')
+        swim = data.get('swim')
+        division = data.get('division')
+        run = data.get('run')
+        name = data.get('name')
+        profession = data.get('profession')
+        country = data.get('country')
+        age = data.get('age')
+        run_distance = data.get('run_distance')
+        bib = data.get('bib')
+        state = data.get('state')
+        bike = data.get('bike')
+        gender_rank = data.get('gender_rank')
+        overall = data.get('overall')
+        swim_distance = data.get('swim_distance')
+        overall_rank = data.get('overall_rank')
+        points = data.get('points')
+        t2 = data.get('t2')
+        bike_distance = data.get('bike_distance')
+        t1 = data.get('t1')
+        div_rank = data.get('div_rank')
+
+        cur.execute("UPDATE rezultat SET swim = %s, division = %s, run = %s, name = %s, profession = %s, country = %s, age = %s, run_distance = %s, bib = %s, state = %s, bike = %s, gender_rank = %s, overall = %s, swim_distance = %s, overall_rank = %s, points = %s, t2 = %s, bike_distance = %s, t1 = %s, div_rank = %s WHERE id = %s", (swim, division, run, name, profession, country, age, run_distance, bib, state, bike, gender_rank, overall, swim_distance, overall_rank, points, t2, bike_distance, t1, div_rank, id))
+
+        conn.commit()
+        return jsonify({"message": "Result changed successfully"}), 200
+    
 if __name__ == '__main__':
     app.run()
 cur.close()
