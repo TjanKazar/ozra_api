@@ -181,7 +181,37 @@ def post_tekmovanje():
         return jsonify({"message": "Result added successfully"}), 201  
     except Exception as e:
         conn.rollback()
-        return jsonify({"error": "sorry boss something happened"}), 500
+        return jsonify({"error": str(e)}), 500
+
+
+
+@app.delete('/tekmovanjedelete')
+def delete_tekmovanje():
+    try:
+        data = request.get_json()
+        id = data.get("id")
+        cur.execute("DELETE FROM tekmovanje WHERE id = %s", (id,))
+        
+        conn.commit()
+
+        return jsonify({"message": "Result deleted successfully"}), 204  
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": str(e)}), 500
+    
+@app.delete('/rezultatdelete')
+def delete_rezultat():
+    try:
+        data = request.get_json()
+        id = data.get("id")
+        cur.execute("DELETE FROM rezultat WHERE id = %s", (id,))
+        
+        conn.commit()
+
+        return jsonify({"message": "Result deleted successfully"}), 204  
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':
