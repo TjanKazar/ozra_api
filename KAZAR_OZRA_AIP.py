@@ -13,8 +13,6 @@ cur = conn.cursor()
 
 app = Flask("ozraAPI")
 
-
-    
 @app.get("/asdf")
 def get_tekmovanja():
         cur.execute("SELECT * FROM Tekmovanje")
@@ -28,8 +26,6 @@ def get_tekmovanja():
                     "results": row[3], 
             })
         return jsonify(result)
-
-
 
 @app.get('/rezultati')
 def get_rezultati():
@@ -175,7 +171,6 @@ def post_tekmovanje():
 
         return jsonify({"message": "Result added successfully"}), 201  
 
-
 @app.delete('/tekmovanjedelete')
 def delete_tekmovanje():
         data = request.get_json()
@@ -185,8 +180,7 @@ def delete_tekmovanje():
         conn.commit()
 
         return jsonify({"message": "Result deleted successfully"}), 204  
-
-    
+  
 @app.delete('/rezultatdelete')
 def delete_rezultat():
         data = request.get_json()
@@ -238,7 +232,7 @@ def put_rezultat():
 
         conn.commit()
         return jsonify({"message": "Result changed successfully"}), 200
-    
+
 if __name__ == '__main__':
     app.run()
 cur.close()
