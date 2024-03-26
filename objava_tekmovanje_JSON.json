@@ -1,0 +1,22 @@
+{
+    "0": {
+      "Uporabnik_ID": 1,
+      "Tekmovanje_ID": 101
+    },
+    "1": {
+      "Uporabnik_ID": 2,
+      "Tekmovanje_ID": 102
+    },
+    "2": {
+      "Uporabnik_ID": 3,
+      "Tekmovanje_ID": 103
+    },
+    "3": {
+      "Uporabnik_ID": 4,
+      "Tekmovanje_ID": 104
+    },
+    "4": {
+      "Uporabnik_ID": 5,
+      "Tekmovanje_ID": 105
+    }
+  }

@@ -7,8 +7,13 @@ from datetime import datetime
 from Tekmovanje import Tekmovanje
 from Rezultat import Rezultat
 
-json_string_location = r"C:\Users\tjank\OneDrive - Univerza v Mariboru\git_repos\Orodja-za-razvoj-aplikacij\uporabniki_JSON.json"
-with open(json_string_location, 'r') as file:
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+filename = r"uporabniki_JSON.json"
+
+json_file_path = os.path.join(current_dir, filename)
+
+with open(json_file_path, 'r') as file:
     uporabnik_data = json.load(file)
 
 conn = psycopg2.connect(

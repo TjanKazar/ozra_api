@@ -5,8 +5,14 @@ import psycopg2
 import time
 from datetime import datetime
 
-json_string_location = r"C:\Users\tjank\OneDrive - Univerza v Mariboru\git_repos\Orodja-za-razvoj-aplikacij\objava_tekmovanje_JSON.json"
-with open(json_string_location, 'r') as file:
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+filename = r"objava_tekmovanje_JSON.json"
+
+json_file_path = os.path.join(current_dir, filename)
+
+
+with open(json_file_path, 'r') as file:
     objava_data = json.load(file)
 
 conn = psycopg2.connect(

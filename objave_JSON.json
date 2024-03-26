@@ -1,0 +1,52 @@
+{
+    "0": {
+      "title": "Title 1",
+      "body": "Content of the first post.",
+      "autor": "Author1",
+      "upvote": 10,
+      "downvote": 2,
+      "visible": true
+    },
+    "1": {
+      "title": "Title 2",
+      "body": "Content of the second post.",
+      "autor": "Author2",
+      "upvote": 5,
+      "downvote": 1,
+      "visible": false
+    },
+    "2": {
+      "title": "Title 3",
+      "body": "Content of the third post.",
+      "autor": "Author3",
+      "upvote": 20,
+      "downvote": 0,
+      "visible": true
+    },
+    "3": {
+        "title": "Title 4",
+        "body": "Content of the fourth post.",
+        "autor": "Author4",
+        "upvote": 15,
+        "downvote": 3,
+        "visible": true
+      },
+      "4": {
+        "title": "Title 5",
+        "body": "Content of the fifth post.",
+        "autor": "Author5",
+        "upvote": 8,
+        "downvote": 0,
+        "visible": false
+      },
+      "5": {
+        "title": "Title 6",
+        "body": "Content of the sixth post.",
+        "autor": "Author6",
+        "upvote": 25,
+        "downvote": 5,
+        "visible": true
+      }
+
+  }
+  
