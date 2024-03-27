@@ -41,8 +41,11 @@ def if_missing(data):
     else:
         return data
 
-json_folder_path = r"C:\Users\tjank\OneDrive - Univerza v Mariboru\git_repos\Race-Results\IRONMAN\JSON"
-json_folder_path_703 = r"C:\Users\tjank\OneDrive - Univerza v Mariboru\git_repos\Race-Results\IRONMAN70.3\JSON"
+script_dir = os.path.dirname(__file__)
+
+race_results_folder = os.path.join(script_dir, "Race-Results")
+json_folder_path = os.path.join(race_results_folder, "IRONMAN", "JSON")
+json_folder_path_703 = os.path.join(race_results_folder, "IRONMAN70.3", "JSON")
 
 datoteke_im = os.listdir(json_folder_path)
 datoteke_json_im = [os.path.join(json_folder_path, f) for f in datoteke_im if f.endswith('.json')]
@@ -98,8 +101,7 @@ create_rezultat_table = '''CREATE TABLE rezultat
     t2                      TEXT,
     bike_distance           TEXT,
     t1                      TEXT,
-    div_rank                TEXT,
-    competition_name_year   TEXT); '''
+    div_rank                TEXT); '''
 
 cur.execute(create_rezultat_table)
 conn.commit()
@@ -114,20 +116,32 @@ cur.execute(create_tekmovanje_table)
 conn.commit()
 
 postres_insert_query_rez = """INSERT INTO rezultat 
-    (swim, division, run, name, profession, country, age, run_distance, bib, state, bike, gender_rank, overall, swim_distance, overall_rank, points, t2, bike_distance, t1, div_rank, competition_name_year) 
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+    (swim, division, run, name, profession, country, age, run_distance, bib, state, bike, gender_rank, overall,swim_distance, overall_rank, points, t2, bike_distance, t1, div_rank) 
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
-for rezultat in rezultati_im:
-    filename = rezultat.filename
-    competition_name_year = os.path.splitext(os.path.basename(filename))[0]
-
-    vpis = (rezultat.swim, rezultat.division, rezultat.run, rezultat.name, rezultat.profession, rezultat.country,
-            rezultat.age, rezultat.runDistance, rezultat.bib, rezultat.state, rezultat.bike, rezultat.genderRank,
-            rezultat.overall, rezultat.swimDistance, rezultat.overallRank, rezultat.points, rezultat.t2,
-            rezultat.bikeDistance, rezultat.t1, rezultat.divRank, competition_name_year)
-    cur.execute(postres_insert_query_rez, vpis)
-    conn.commit()
-
+for i in range (len(rezultati_im)):
+        vpis = (rezultati_im[i].swim,
+               rezultati_im[i].division,
+               rezultati_im[i].run,
+               rezultati_im[i].name,
+               rezultati_im[i].profession,
+               rezultati_im[i].country,
+               rezultati_im[i].age,
+               rezultati_im[i].runDistance,
+               rezultati_im[i].bib,
+               rezultati_im[i].state,
+               rezultati_im[i].bike,
+               rezultati_im[i].genderRank,
+               rezultati_im[i].overall,
+               rezultati_im[i].swimDistance,
+               rezultati_im[i].overallRank,
+               rezultati_im[i].points,
+               rezultati_im[i].t2,
+               rezultati_im[i].bikeDistance,
+               rezultati_im[i].t1,
+               rezultati_im[i].divRank)
+        cur.execute(postres_insert_query_rez, vpis)
+        conn.commit()
 
 for i in range (len(rezultati_im703)):
         vpis1 = (rezultati_im[i].swim,

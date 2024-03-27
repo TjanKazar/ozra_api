@@ -2,7 +2,14 @@ import py2psql
 import psycopg2
 import json
 import Tekmovanje
+import Rezultat
 from flask import Flask, jsonify, request
+
+
+def convert_to_proper_case(name):
+    parts = name.split('_')
+    proper_name = ' '.join(part.capitalize() for part in parts)
+    return proper_name
 
 conn = psycopg2.connect(user=py2psql.username,
                         password=py2psql.pwd,
@@ -107,7 +114,7 @@ def get_rezultat(id):
     return jsonify(result)
 
 @app.get('/tekmovanje/<int:id>')
-def get_tekmovanje_year(id):
+def get_tekmovanje(id):
     query = "SELECT * FROM Tekmovanje WHERE id = %s"
     cur.execute(query, (id))
     row = cur.fetchone()
@@ -120,7 +127,7 @@ def get_tekmovanje_year(id):
     return jsonify(result)
 
 @app.get('/tekmovanje_year/<year>')
-def get_tekmovanje(year):
+def get_tekmovanje_year(year):
     query = "SELECT * FROM Tekmovanje WHERE year = %s"
     cur.execute(query, (year,))
     result = []
@@ -149,6 +156,97 @@ def get_tekmovanje_name(competition_name):
                 })
     return jsonify(result)
 
+@app.get('/porocilotekmovanja/<int:id>')
+def get_porocilo(id):
+    query = "SELECT Rezultat_ID FROM rezultat_tekmovanje WHERE Tekmovanje_ID = %s"
+    cur.execute(query, (id,))
+    rows = cur.fetchall()
+
+    nastopi = []
+    for row in rows:
+        rezultat_id = row[0]
+        query2 = "SELECT * FROM rezultat WHERE id = %s"
+        cur.execute(query2, (rezultat_id,))
+        nastopi.append(cur.fetchone())
+
+    cas_plavanja = []
+    cas_plavanja.append(nastopi)
+    return jsonify(nastopi)
+
+@app.get('/swimmers/<int:id>')
+def get_bestSwimmers(id):
+    query = "SELECT Rezultat_ID, swim FROM rezultat_tekmovanje JOIN rezultat ON rezultat_tekmovanje.Rezultat_ID = rezultat.ID WHERE Tekmovanje_ID = %s"
+    cur.execute(query, (id,))
+    rows = cur.fetchall()
+
+    swim_times = {}
+    for row in rows:
+        rezultat_id = row[0]
+        swim_time = row[1]
+        if swim_time != '---':
+            swim_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(swim_time.split(':'))))
+            swim_times[rezultat_id] = swim_seconds
+    
+    shortest_swim_times = sorted(swim_times.items(), key=lambda item: item[1])[:3]
+    
+    top_3_swimmers = []
+    for swimmer_id, _ in shortest_swim_times:
+        query2 = "SELECT * FROM rezultat WHERE id = %s"
+        cur.execute(query2, (swimmer_id,))
+        top_3_swimmers.append(cur.fetchone())
+
+    return jsonify(top_3_swimmers)
+
+@app.get('/runners/<int:id>')
+def get_bestRunners(id):
+    query = "SELECT Rezultat_ID, run FROM rezultat_tekmovanje JOIN rezultat ON rezultat_tekmovanje.Rezultat_ID = rezultat.ID WHERE Tekmovanje_ID = %s"
+    cur.execute(query, (id,))
+    rows = cur.fetchall()
+
+    run_times = {}
+    for row in rows:
+        rezultat_id = row[0]
+        run_time = row[1]
+        if run_time != '---':
+            swim_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(run_time.split(':'))))
+            run_times[rezultat_id] = swim_seconds
+    
+    shortest_run_times = sorted(run_times.items(), key=lambda item: item[1])[:3]
+    
+    top_3_runners = []
+    for runner_id, _ in shortest_run_times:
+        query2 = "SELECT * FROM rezultat WHERE id = %s"
+        cur.execute(query2, (runner_id,))
+        top_3_runners.append(cur.fetchone())
+
+    return jsonify(top_3_runners)
+
+    
+@app.get('/bikers/<int:id>')
+def get_bestBikers(id):
+    query = "SELECT Rezultat_ID, bike FROM rezultat_tekmovanje JOIN rezultat ON rezultat_tekmovanje.Rezultat_ID = rezultat.ID WHERE Tekmovanje_ID = %s"
+    cur.execute(query, (id,))
+    rows = cur.fetchall()
+
+    bike_times = {}
+    for row in rows:
+        rezultat_id = row[0]
+        bike_time = row[1]
+        if bike_time != '---':
+            swim_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(bike_time.split(':'))))
+            bike_times[rezultat_id] = swim_seconds
+    
+    shortest_bike_times = sorted(bike_times.items(), key=lambda item: item[1])[:3]
+    
+    top_3_bikers = []
+    for biker_id, _ in shortest_bike_times:
+        query2 = "SELECT * FROM rezultat WHERE id = %s"
+        cur.execute(query2, (biker_id,))
+        top_3_bikers.append(cur.fetchone())
+
+    return jsonify(top_3_bikers)
+
+
 
 @app.get('/tekmovanje/<competition_name>/<year>')
 def get_tekmovanje_name_year(competition_name, year):
@@ -162,6 +260,43 @@ def get_tekmovanje_name_year(competition_name, year):
         "results": row[3], 
             }
     return jsonify(result)
+
+@app.get('/tekmovalec_best_overall/<name>')
+def get_porocilo_tekmovalca(name):
+    name_parsed = convert_to_proper_case(name)
+    query = "SELECT * FROM rezultati WHERE name = %s"
+    cur.execute(query, (name_parsed,))
+    rows = cur.fetchall()
+    result = []
+    for row in rows:
+        result.append({
+            "id": row[0],
+            "swim": row[1],
+            "division": row[2],
+            "run": row[3],
+            "name": row[4],
+            "profession": row[5],
+            "country": row[6],
+            "age": row[7],
+            "run_distance": row[8],
+            "bib": row[9],
+            "state": row[10],
+            "bike": row[11],
+            "gender_rank": row[12],
+            "overall": row[13],
+            "swim_distance": row[14],
+            "overall_rank": row[15],
+            "points": row[16],
+            "t2": row[17],
+            "bike_distance": row[18],
+            "t1": row[19],
+            "div_rank": row[20]
+        })
+    return jsonify({
+        result
+    })
+
+
 
 @app.post("/rezultatpost")
 def post_rezultat():
@@ -214,7 +349,8 @@ def post_objava():
       conn.commit()
       return jsonify({"message": "Objava posted successfully"}), 201
 
-# Za povzetek tekmovanja (7. korak) ... napštej prve tri tekmovalce (overall time gledaj), najstarejšega tekmovalca, najmlajšega, najhitrejše plavalce, kolesarje itd.
+
+
 # Za povzetek tekmovalca (8, korak) lahko st. nastopov, najhitrejši čas, najhitrejši swim, bike itd.
 # Za 9. korak uporabniko accessible nastavi na false
 # 10. korak je post za Uporabnik_tekmovanje

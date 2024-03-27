@@ -29,9 +29,8 @@ conn.commit()
 
 create_uporabnik_tekmovanje_table = '''CREATE TABLE uporabnik_tekmovanje (
     ID SERIAL PRIMARY KEY NOT NULL,
-    Uporabnik_ID INTEGER REFERENCES Uporabnik(ID),
-    Tekmovanje_ID INTEGER REFERENCES Tekmovanje(ID),
-    UNIQUE (Uporabnik_ID, Tekmovanje_ID)
+    Uporabnik_ID INTEGER,
+    Tekmovanje_ID INTEGER
 );'''
 cur.execute(create_uporabnik_tekmovanje_table)
 conn.commit()
@@ -50,7 +49,7 @@ for key, value in objava_data.items():
 
 zacetek = time.time()
 zacetekDatetime = datetime.fromtimestamp(zacetek).strftime('%Y-%m-%d %H:%M:%S')
-print("začetek : " + str(zacetekDatetime))
+print("zacetek : " + str(zacetekDatetime))
 
 cur.close()
 conn.close()
