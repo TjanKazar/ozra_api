@@ -156,6 +156,38 @@ def post_rezultat():
 
         return jsonify({"message": "Result added successfully"}), 201  
 
+@app.post('/objavapost')
+def post_objava():
+      data = request.get_json()
+      title = data.get('title')
+      body = data.get('body')
+      autor = data.get('autor')
+      upvote = data.get('upvote')
+      downvote = data.get('downvote')
+
+      cur.execute("""INSERT INTO objava (title, body, autor, upvote, downvote)
+                  VALUES (%s, %s, %s, %s, %s)""", (title, body, autor, upvote, downvote))
+      conn.commit()
+      return jsonify({"message": "Objava posted successfully"}), 201
+
+# Za povzetek tekmovanja (7. korak) ... napštej prve tri tekmovalce (overall time gledaj), najstarejšega tekmovalca, najmlajšega, najhitrejše plavalce, kolesarje itd.
+# Za povzetek tekmovalca (8, korak) lahko st. nastopov, najhitrejši čas, najhitrejši swim, bike itd.
+# Za 9. korak uporabniko accessible nastavi na false
+# 10. korak je post za Uporabnik_tekmovanje
+
+#uporabniški app
+# 1. korak je get objava, mogoče več getov, mogoče kakšen WHERE
+# 2. korak rešen v 10 koraku admin appa
+# 3. korak je 8. korak admin appa z le eno možnostjo za id
+# 4. korak 8. korak admin appa 
+# 5. korak je post objava, author je user
+# 6. korak je put na objava (upvote, downvote)
+# 7. korak je folowing, ... /TODO se kak to resit
+# 8. korak je delete objava where autor = uporabnik ... /TODO
+# 9. korak je put uporabnik
+#10. korak je get obvestilo ? /TODO mby naredi class obvestilo
+
+
 @app.post('/Tekmovanjepost')
 def post_tekmovanje():
         data = request.get_json()
