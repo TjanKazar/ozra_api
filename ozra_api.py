@@ -13,7 +13,7 @@ cur = conn.cursor()
 
 app = Flask("ozraAPI")
 
-@app.get("/asdf")
+@app.get("/tekmovanja")
 def get_tekmovanja():
         cur.execute("SELECT * FROM Tekmovanje")
         rows = cur.fetchall()
@@ -107,9 +107,53 @@ def get_rezultat(id):
     return jsonify(result)
 
 @app.get('/tekmovanje/<int:id>')
-def get_tekmovanje(id):
+def get_tekmovanje_year(id):
     query = "SELECT * FROM Tekmovanje WHERE id = %s"
-    cur.execute(query, (id,))
+    cur.execute(query, (id))
+    row = cur.fetchone()
+    result = {
+        "id": row[0],
+        "competition_name": row[1],  
+        "year": row[2], 
+        "results": row[3], 
+            }
+    return jsonify(result)
+
+@app.get('/tekmovanje_year/<year>')
+def get_tekmovanje(year):
+    query = "SELECT * FROM Tekmovanje WHERE year = %s"
+    cur.execute(query, (year,))
+    result = []
+    rows = cur.fetchall()
+    for row in rows:
+        result.append ({
+            "id": row[0],
+            "competition_name": row[1],  
+            "year": row[2], 
+            "results": row[3], 
+                })
+    return jsonify(result)
+
+@app.get('/tekmovanje_name/<competition_name>')
+def get_tekmovanje_name(competition_name):
+    query = "SELECT * FROM Tekmovanje WHERE competition_name = %s"
+    cur.execute(query, (competition_name,))
+    result = []
+    rows = cur.fetchall()
+    for row in rows:
+        result.append ({
+            "id": row[0],
+            "competition_name": row[1],  
+            "year": row[2], 
+            "results": row[3], 
+                })
+    return jsonify(result)
+
+
+@app.get('/tekmovanje/<competition_name>/<year>')
+def get_tekmovanje_name_year(competition_name, year):
+    query = "SELECT * FROM Tekmovanje WHERE competition_name = %s AND year = %s"
+    cur.execute(query, (competition_name, year))
     row = cur.fetchone()
     result = {
         "id": row[0],
