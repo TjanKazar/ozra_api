@@ -459,7 +459,7 @@ def get_porocilo_tekmovalca_tekme_bike(name):
 
 @app.put('/change_access')
 def change_access():
-    data = request.json
+    data = request.get_json()
     value = data["accessible"]
     id = data["id"]
     cur.execute("UPDATE uporabnik SET accessible = %s WHERE id = %s", (value, id))
@@ -467,14 +467,56 @@ def change_access():
     return jsonify({"message": "User access updated"})
 
 
-# Za 9. korak uporabniku accessible nastavi na false
+
+
 # 10. korak je post za Uporabnik_tekmovanje
+@app.post('/uporabnik_tekmovanje_post')
+def uporabnik_tekmovanje_post():
+    data = request.get_json()
+    tk_uporabnik = data["uporabnik_id"]
+    tk_tekmovanje = data["tekmovanje_id"]
+    cur.execute("INSERT INTO uporabnik_tekmovanje (uporabnik_id, tekmovanje_id) VALUES (%s, %s)", (tk_uporabnik, tk_tekmovanje))
+    conn.commit()
+    return "uporabnik_tekmovanje added"
 
 #uporabniški app
-# 1. korak je get objava, mogoče več getov, mogoče kakšen WHERE
-# 2. korak rešen v 10 koraku admin appa
+# 1. korak je get objava, mogoče več getov
+@app.get('/Objave')
+def objave_get():
+    query = "SELECT * FROM objava"
+    cur.execute(query)
+    result = []
+    rows = cur.fetchall()
+    for row in rows:
+        result.append ({
+            "id": row[0],
+            "name": row[1],  
+            "surname": row[2], 
+            "birth_date": row[3],
+            "password": row[4],
+            "accessible": row[5] 
+                })
+    return jsonify(result)
+
+
+@app.get('/Objava/<int:id>')
+def objave_get_one(id):
+    query = "SELECT * FROM objava where id = %s"
+    cur.execute(query, (id,))
+    row = cur.fetchone() 
+    result = {} 
+    if row:
+        result = {
+            "id": row[0],
+            "name": row[1],  
+            "surname": row[2], 
+            "birth_date": row[3],
+            "password": row[4],
+            "accessible": row[5] 
+        }
+    return jsonify(result)
+
 # 3. korak je 8. korak admin appa z le eno možnostjo za id
-# 4. korak 8. korak admin appa 
 # 5. korak je post objava, author je user
 # 6. korak je put na objava (upvote, downvote)
 # 7. korak je folowing, ... /TODO se kak to resit
