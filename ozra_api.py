@@ -7,7 +7,7 @@ from flask import Flask, jsonify, request
 import datetime
 import poslogika
 
-
+# attempt 1
 
 def get_shortest_time(rows):
     min_time = float('inf')
