@@ -66,7 +66,7 @@ def get_rezultati():
         
     query = "SELECT * FROM Rezultat LIMIT %s OFFSET %s"
     cur.execute(query, (limit, offset))
-        
+        #asdf 
     rows = cur.fetchall()
     result = []
     for row in rows:
