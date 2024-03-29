@@ -1,4 +1,4 @@
 git add .
-git commit -m "small changes"
+git commit -m "$@"
 git push -u origin master
 
