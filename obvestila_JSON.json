@@ -1,0 +1,33 @@
+[
+    {
+      "title": "First Post",
+      "user_fk": 2,
+      "body": "This is the body of the first post."
+    },
+    {
+      "title": "Second Post",
+      "user_fk": 2,
+      "body": "This is the body of the second post."
+    },
+    {
+      "title": "Third Post",
+      "user_fk": 4,
+      "body": "This is the body of the third post."
+    },
+    {
+      "title": "Fourth Post",
+      "user_fk": 2,
+      "body": "This is the body of the fourth post."
+    },
+    {
+      "title": "Fifth Post",
+      "user_fk": 4,
+      "body": "This is the body of the fifth post."
+    },
+    {
+      "title": "Sixth Post",
+      "user_fk": 4,
+      "body": "This is the body of the sixth post."
+    }
+  ]
+  

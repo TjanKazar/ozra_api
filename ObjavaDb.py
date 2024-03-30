@@ -27,8 +27,9 @@ conn.commit()
 create_objava_table = '''CREATE TABLE objava
     (ID SERIAL PRIMARY KEY  NOT NULL,
     title                   TEXT,
-    body                TEXT,
+    body                    TEXT,
     autor                   TEXT,
+    autor_id                INTEGER,
     upvote                  INTEGER,
     downvote                INTEGER,
     visible                 BOOLEAN); '''
@@ -36,24 +37,21 @@ cur.execute(create_objava_table)
 conn.commit()
 
 objava_insert_query = """INSERT INTO objava 
-    (title, body, autor, upvote, downvote, visible) 
-    VALUES (%s, %s, %s, %s, %s, %s)"""
+    (title, body, autor,autor_id, upvote, downvote, visible) 
+    VALUES (%s, %s, %s, %s, %s, %s, %s)"""
 
 for key, value in objava_data.items():
     objava_values = (
         value["title"],
         value["body"],
         value["autor"],
+        value["autor_id"],
         value["upvote"],
         value["downvote"],
         value["visible"]
     )
     cur.execute(objava_insert_query, objava_values)
     conn.commit()
-
-zacetek = time.time()
-zacetekDatetime = datetime.fromtimestamp(zacetek).strftime('%Y-%m-%d %H:%M:%S')
-print("začetek : " + str(zacetekDatetime))
 
 cur.close()
 conn.close()

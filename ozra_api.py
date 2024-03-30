@@ -7,28 +7,6 @@ from flask import Flask, jsonify, request
 import datetime
 import poslogika
 
-# attempt 1
-
-def get_shortest_time(rows):
-    min_time = float('inf')
-    min_time_entry = None
-
-    for row in rows:
-        overall_time_str = row['overall']
-        
-        try:
-            overall_time = datetime.datetime.strptime(overall_time_str, '%H:%M:%S')
-        except ValueError:
-            continue
-
-        total_seconds = overall_time.hour * 3600 + overall_time.minute * 60 + overall_time.second
-        
-        if total_seconds < min_time:
-            min_time = total_seconds
-            min_time_entry = row
-
-    return min_time_entry
-
 conn = psycopg2.connect(user=py2psql.username,
                         password=py2psql.pwd,
                         host=py2psql.hostname,
@@ -38,6 +16,125 @@ cur = conn.cursor()
 
 app = Flask("ozraAPI")
 
+#NAMIZNA ADMINISTRATORSKA APLIKACIJA
+#desktop 1
+@app.put('/Tekmovanjeput')
+def put_tekmovanje():
+        data = request.get_json()
+        id = data.get('id')
+        competition_name = data.get('competition_name')
+        year = data.get('year')
+        results = data.get('results')
+
+        cur.execute("UPDATE tekmovanje SET competition_name = %s, year = %s, results = %s WHERE id = %s", (competition_name, year, results, id ))
+        conn.commit()
+        return jsonify({"message": "Result changed successfully"}), 200
+
+@app.put('/Rezultatput')
+def put_rezultat():
+        data = request.get_json()
+        id = data.get('id')
+        swim = data.get('swim')
+        division = data.get('division')
+        run = data.get('run')
+        name = data.get('name')
+        profession = data.get('profession')
+        country = data.get('country')
+        age = data.get('age')
+        run_distance = data.get('run_distance')
+        bib = data.get('bib')
+        state = data.get('state')
+        bike = data.get('bike')
+        gender_rank = data.get('gender_rank')
+        overall = data.get('overall')
+        swim_distance = data.get('swim_distance')
+        overall_rank = data.get('overall_rank')
+        points = data.get('points')
+        t2 = data.get('t2')
+        bike_distance = data.get('bike_distance')
+        t1 = data.get('t1')
+        div_rank = data.get('div_rank')
+
+        cur.execute("UPDATE rezultat SET swim = %s, division = %s, run = %s, name = %s, profession = %s, country = %s, age = %s, run_distance = %s, bib = %s, state = %s, bike = %s, gender_rank = %s, overall = %s, swim_distance = %s, overall_rank = %s, points = %s, t2 = %s, bike_distance = %s, t1 = %s, div_rank = %s WHERE id = %s", (swim, division, run, name, profession, country, age, run_distance, bib, state, bike, gender_rank, overall, swim_distance, overall_rank, points, t2, bike_distance, t1, div_rank, id))
+
+        conn.commit()
+        return jsonify({"message": "Result changed successfully"}), 200
+
+#desktop 2
+@app.delete('/tekmovanjedelete')
+def delete_tekmovanje():
+        data = request.get_json()
+        id = data.get('id')
+        cur.execute("DELETE FROM tekmovanje WHERE id = %s", (id,))
+        
+        conn.commit()
+
+        return jsonify({"message": "Result deleted successfully"}), 204  
+  
+@app.delete('/rezultatdelete')
+def delete_rezultat():
+        data = request.get_json()
+        id = data.get('id')
+        cur.execute("DELETE FROM rezultat WHERE id = %s", (id,))
+        
+        conn.commit()
+
+        return jsonify({"message": "Result deleted successfully"}), 204  
+
+#desktop 3
+@app.post("/rezultatpost")
+def post_rezultat():
+        data = request.get_json()
+
+        swim = data.get('swim')
+        division = data.get('division')
+        run = data.get('run')
+        name = data.get('name')
+        profession = data.get('profession')
+        country = data.get('country')
+        age = data.get('age')
+        run_distance = data.get('run_distance')
+        bib = data.get('bib')
+        state = data.get('state')
+        bike = data.get('bike')
+        gender_rank = data.get('gender_rank')
+        overall = data.get('overall')
+        swim_distance = data.get('swim_distance')
+        overall_rank = data.get('overall_rank')
+        points = data.get('points')
+        t2 = data.get('t2')
+        bike_distance = data.get('bike_distance')
+        t1 = data.get('t1')
+        div_rank = data.get('div_rank')
+
+        cur.execute("""
+            INSERT INTO Rezultat (swim, division, run, name, profession, country, age, run_distance,
+                                    bib, state, bike, gender_rank, overall, swim_distance, overall_rank,
+                                    points, t2, bike_distance, t1, div_rank)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (swim, division, run, name, profession, country, age, run_distance, bib, state, bike,
+                gender_rank, overall, swim_distance, overall_rank, points, t2, bike_distance, t1, div_rank))
+
+        conn.commit()
+
+        return jsonify({"message": "Result added successfully"}), 201  
+
+@app.post('/Tekmovanjepost')
+def post_tekmovanje():
+        data = request.get_json()
+        competition_name = data.get('competition_name')
+        year = data.get('year')
+        results = data.get('results')
+
+        cur.execute("""
+            INSERT INTO tekmovanje (competition_name, year, results)
+            VALUES (%s, %s, %s)""", (competition_name, year, results))
+        
+        conn.commit()
+
+        return jsonify({"message": "Result added successfully"}), 201
+
+#desktop 4
 @app.get("/tekmovanja")
 def get_tekmovanja():
         cur.execute("SELECT * FROM Tekmovanje")
@@ -99,38 +196,28 @@ def get_rezultati():
         "current_page": page,
         "data": result
     })
+#desktop 5
+@app.post("/obvestilo")
+def post_obvestilo():
+    data = request.get_json()
+    title = data["title"]
+    body = data["body"]
+    query = "INSERT INTO obvestilo (title, body) values (%s, %s)"
+    cur.execute(query, (title, body))
+    conn.commit()
+    return jsonify ({"message": "obvestilo added"})
+#desktop 6
+@app.post("/dogodek")
+def post_dogodek():
+    data = request.get_json()
+    tekmovanje_ID = data["objava_ID"]
+    objava_ID = data["objava_ID"]
+    query = "INSERT INTO objava (tekmovanje_ID, objava_ID) VALUES (%s, %s)"
+    cur.execute(query, (tekmovanje_ID, objava_ID))
+    conn.commit()
+    return jsonify({"message": "objava added"})
 
-@app.get("/rezultat/<int:id>")
-def get_rezultat(id):
-    query = "SELECT * FROM Rezultat WHERE id = %s"
-    cur.execute(query, (id,))
-    row = cur.fetchone()
-
-    result = {
-            "id": row[0],
-            "swim": row[1],
-            "division": row[2],
-            "run": row[3],
-            "name": row[4],
-            "profession": row[5],
-            "country": row[6],
-            "age": row[7],
-            "run_distance": row[8],
-            "bib": row[9],
-            "state": row[10],
-            "bike": row[11],
-            "gender_rank": row[12],
-            "overall": row[13],
-            "swim_distance": row[14],
-            "overall_rank": row[15],
-            "points": row[16],
-            "t2": row[17],
-            "bike_distance": row[18],
-            "t1": row[19],
-            "div_rank": row[20]
-        }
-    return jsonify(result)
-
+#desktop 7
 @app.get('/tekmovanje/<int:id>')
 def get_tekmovanje(id):
     query = "SELECT * FROM Tekmovanje WHERE id = %s"
@@ -197,23 +284,15 @@ def get_bestSwimmers(id):
     cur.execute(query, (id,))
     rows = cur.fetchall()
 
-    swim_times = {}
-    for row in rows:
-        rezultat_id = row[0]
-        swim_time = row[1]
-        if swim_time != '---':
-            swim_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(swim_time.split(':'))))
-            swim_times[rezultat_id] = swim_seconds
-    
-    shortest_swim_times = sorted(swim_times.items(), key=lambda item: item[1])[:3]
-    
-    top_3_swimmers = []
-    for swimmer_id, _ in shortest_swim_times:
+    top_swimmer_ids = poslogika.get_top_swimmers(rows)
+
+    top_swimmers = []
+    for swimmer_id in top_swimmer_ids:
         query2 = "SELECT * FROM rezultat WHERE id = %s"
         cur.execute(query2, (swimmer_id,))
-        top_3_swimmers.append(cur.fetchone())
+        top_swimmers.append(cur.fetchone())
 
-    return jsonify(top_3_swimmers)
+    return jsonify(top_swimmers)
 
 @app.get('/runners/<int:id>')
 def get_bestRunners(id):
@@ -221,50 +300,31 @@ def get_bestRunners(id):
     cur.execute(query, (id,))
     rows = cur.fetchall()
 
-    run_times = {}
-    for row in rows:
-        rezultat_id = row[0]
-        run_time = row[1]
-        if run_time != '---':
-            swim_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(run_time.split(':'))))
-            run_times[rezultat_id] = swim_seconds
-    
-    shortest_run_times = sorted(run_times.items(), key=lambda item: item[1])[:3]
-    
-    top_3_runners = []
-    for runner_id, _ in shortest_run_times:
+    top_runner_ids = poslogika.get_top_runners(rows)
+
+    top_runners = []
+    for runner_id in top_runner_ids:
         query2 = "SELECT * FROM rezultat WHERE id = %s"
         cur.execute(query2, (runner_id,))
-        top_3_runners.append(cur.fetchone())
+        top_runners.append(cur.fetchone())
 
-    return jsonify(top_3_runners)
+    return jsonify(top_runners)
 
-    
 @app.get('/bikers/<int:id>')
 def get_bestBikers(id):
     query = "SELECT Rezultat_ID, bike FROM rezultat_tekmovanje JOIN rezultat ON rezultat_tekmovanje.Rezultat_ID = rezultat.ID WHERE Tekmovanje_ID = %s"
     cur.execute(query, (id,))
     rows = cur.fetchall()
 
-    bike_times = {}
-    for row in rows:
-        rezultat_id = row[0]
-        bike_time = row[1]
-        if bike_time != '---':
-            swim_seconds = sum(int(x) * 60 ** i for i, x in enumerate(reversed(bike_time.split(':'))))
-            bike_times[rezultat_id] = swim_seconds
-    
-    shortest_bike_times = sorted(bike_times.items(), key=lambda item: item[1])[:3]
-    
-    top_3_bikers = []
-    for biker_id, _ in shortest_bike_times:
+    top_biker_ids = poslogika.get_top_bikers(rows)
+
+    top_bikers = []
+    for biker_id in top_biker_ids:
         query2 = "SELECT * FROM rezultat WHERE id = %s"
         cur.execute(query2, (biker_id,))
-        top_3_bikers.append(cur.fetchone())
+        top_bikers.append(cur.fetchone())
 
-    return jsonify(top_3_bikers)
-
-
+    return jsonify(top_bikers)
 
 @app.get('/tekmovanje/<competition_name>/<year>')
 def get_tekmovanje_name_year(competition_name, year):
@@ -278,6 +338,39 @@ def get_tekmovanje_name_year(competition_name, year):
         "results": row[3], 
             }
     return jsonify(result)
+#desktop 8, web 3, web 4
+
+@app.get("/rezultat/<int:id>")
+def get_rezultat(id):
+    query = "SELECT * FROM Rezultat WHERE id = %s"
+    cur.execute(query, (id,))
+    row = cur.fetchone()
+
+    result = {
+            "id": row[0],
+            "swim": row[1],
+            "division": row[2],
+            "run": row[3],
+            "name": row[4],
+            "profession": row[5],
+            "country": row[6],
+            "age": row[7],
+            "run_distance": row[8],
+            "bib": row[9],
+            "state": row[10],
+            "bike": row[11],
+            "gender_rank": row[12],
+            "overall": row[13],
+            "swim_distance": row[14],
+            "overall_rank": row[15],
+            "points": row[16],
+            "t2": row[17],
+            "bike_distance": row[18],
+            "t1": row[19],
+            "div_rank": row[20]
+        }
+    return jsonify(result)
+
 
 @app.get('/tekmovalec/<name>')
 def get_porocilo_tekmovalca(name):
@@ -344,7 +437,7 @@ def get_porocilo_tekmovalca_best_time(name):
             "t1": row[19],
             "div_rank": row[20]
         })
-    data = get_shortest_time(result)
+    data = poslogika.get_shortest_time(result)
 
     return jsonify(data)
 
@@ -420,6 +513,7 @@ def get_porocilo_tekmovalca_tekme_run(name):
     data = poslogika.get_shortest_time_run(result)
 
     return jsonify(data)
+
 @app.get('/tekmovalec_bike/<name>')
 def get_porocilo_tekmovalca_tekme_bike(name):
     name_parsed = poslogika.convert_to_proper_case(name)
@@ -452,11 +546,7 @@ def get_porocilo_tekmovalca_tekme_bike(name):
             "div_rank": row[20]
         })
 
-    data = poslogika.get_shortest_time_bike(result)
-
-    return jsonify(data)
-
-
+#desktop 9
 @app.put('/change_access')
 def change_access():
     data = request.get_json()
@@ -468,8 +558,11 @@ def change_access():
 
 
 
+    data = poslogika.get_shortest_time_bike(result)
 
-# 10. korak je post za Uporabnik_tekmovanje
+    return jsonify(data)
+
+#desktop 10, web 2
 @app.post('/uporabnik_tekmovanje_post')
 def uporabnik_tekmovanje_post():
     data = request.get_json()
@@ -479,8 +572,8 @@ def uporabnik_tekmovanje_post():
     conn.commit()
     return "uporabnik_tekmovanje added"
 
-#uporabniški app
-# 1. korak je get objava, mogoče več getov
+#SPLETNA UPORABNIŠKA APLIKACIJA
+#web 1
 @app.get('/Objave')
 def objave_get():
     query = "SELECT * FROM objava"
@@ -497,7 +590,6 @@ def objave_get():
             "accessible": row[5] 
                 })
     return jsonify(result)
-
 
 @app.get('/Objava/<int:id>')
 def objave_get_one(id):
@@ -516,53 +608,7 @@ def objave_get_one(id):
         }
     return jsonify(result)
 
-# 3. korak je 8. korak admin appa z le eno možnostjo za id
-# 5. korak je post objava, author je user
-# 6. korak je put na objava (upvote, downvote)
-# 7. korak je folowing, ... /TODO se kak to resit
-# 8. korak je delete objava where autor = uporabnik ... /TODO
-# 9. korak je put uporabnik
-#10. korak je get obvestilo ? /TODO mby naredi class obvestilo
-
-
-
-@app.post("/rezultatpost")
-def post_rezultat():
-        data = request.get_json()
-
-        swim = data.get('swim')
-        division = data.get('division')
-        run = data.get('run')
-        name = data.get('name')
-        profession = data.get('profession')
-        country = data.get('country')
-        age = data.get('age')
-        run_distance = data.get('run_distance')
-        bib = data.get('bib')
-        state = data.get('state')
-        bike = data.get('bike')
-        gender_rank = data.get('gender_rank')
-        overall = data.get('overall')
-        swim_distance = data.get('swim_distance')
-        overall_rank = data.get('overall_rank')
-        points = data.get('points')
-        t2 = data.get('t2')
-        bike_distance = data.get('bike_distance')
-        t1 = data.get('t1')
-        div_rank = data.get('div_rank')
-
-        cur.execute("""
-            INSERT INTO Rezultat (swim, division, run, name, profession, country, age, run_distance,
-                                    bib, state, bike, gender_rank, overall, swim_distance, overall_rank,
-                                    points, t2, bike_distance, t1, div_rank)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (swim, division, run, name, profession, country, age, run_distance, bib, state, bike,
-                gender_rank, overall, swim_distance, overall_rank, points, t2, bike_distance, t1, div_rank))
-
-        conn.commit()
-
-        return jsonify({"message": "Result added successfully"}), 201  
-
+#web 5
 @app.post('/objavapost')
 def post_objava():
       data = request.get_json()
@@ -576,83 +622,96 @@ def post_objava():
                   VALUES (%s, %s, %s, %s, %s)""", (title, body, autor, upvote, downvote))
       conn.commit()
       return jsonify({"message": "Objava posted successfully"}), 201
-
-@app.post('/Tekmovanjepost')
-def post_tekmovanje():
-        data = request.get_json()
-        competition_name = data.get('competition_name')
-        year = data.get('year')
-        results = data.get('results')
-
-        cur.execute("""
-            INSERT INTO tekmovanje (competition_name, year, results)
-            VALUES (%s, %s, %s)""", (competition_name, year, results))
-        
+#web 6
+@app.put("/rating")
+def put_objava_rating():
+     data = request.get_json()
+     id = data["id"]
+     upvote = data["upvote"]
+     downvote = data["downvote"]
+     if (upvote == 1) :
+        select_upvote = "SELECT upvote FROM objava WHERE id = %s"
+        cur.execute(select_upvote, (id,))
+        upvotes_current = cur.fetchone()[0]
+        upvotes_new = upvotes_current + 1
+        change_rating = "UPDATE objava SET upvote = %s where id = %s"
+        cur.execute(change_rating, (upvotes_new, id))
+        conn.commit()
+     elif (downvote == 1):
+        select_downvote = "SELECT downvote FROM objava WHERE id = %s"
+        cur.execute(select_downvote, (id,))
+        downvotes_current = cur.fetchone()[0]
+        downvotes_new = downvotes_current + 1
+        change_rating = "UPDATE objava SET downvote = %s where id = %s"
+        cur.execute(change_rating, (downvotes_new, id))
         conn.commit()
 
-        return jsonify({"message": "Result added successfully"}), 201  
+     return jsonify({"message": "rating updated"})
 
-@app.delete('/tekmovanjedelete')
-def delete_tekmovanje():
+#web 7
+
+@app.post('/follow')
+def post_follow():
+     data = request.get_json()
+     follower = data["follower"]
+     followed = data["followed"]
+     query = "INSERT INTO follow (follower, followed) values (%s, %s)"
+     cur.execute(query, (follower, followed))
+     conn.commit()
+     return jsonify({"message": "follow added"})
+#web 8
+@app.delete('/delete_objava/<int:id>')
+def objava_delete(id):
+     data = request.get_json()
+     objava_id = data["objava_id"]
+     autor_id = data["autor_id"]
+     get_objava_query = "SELECT autor_id FROM objava WHERE id = %s"
+     cur.execute(get_objava_query, (id,))
+     result_id = cur.fetchone()  # Fetch the result from the query
+     if result_id is not None:
+         result_id_int = result_id[0]
+         if result_id_int == autor_id:
+            query = "DELETE FROM objava WHERE id = %s"
+            cur.execute(query, (objava_id,))
+            conn.commit()
+            return jsonify({"message": "objava deleted"})
+         else:
+            return jsonify({"message": "error, user cant delete this objava"})
+     else:
+          return jsonify({"message": "error, objava with given ID not found"})
+
+#web 9
+     
+@app.put('/uporabnik/<int:id>')
+def put_uporabnik(id):
         data = request.get_json()
-        id = data.get('id')
-        cur.execute("DELETE FROM tekmovanje WHERE id = %s", (id,))
-        
-        conn.commit()
-
-        return jsonify({"message": "Result deleted successfully"}), 204  
-  
-@app.delete('/rezultatdelete')
-def delete_rezultat():
-        data = request.get_json()
-        id = data.get('id')
-        cur.execute("DELETE FROM rezultat WHERE id = %s", (id,))
-        
-        conn.commit()
-
-        return jsonify({"message": "Result deleted successfully"}), 204  
-
-@app.put('/Tekmovanjeput')
-def put_tekmovanje():
-        data = request.get_json()
-        id = data.get('id')
-        competition_name = data.get('competition_name')
-        year = data.get('year')
-        results = data.get('results')
-
-        cur.execute("UPDATE tekmovanje SET competition_name = %s, year = %s, results = %s WHERE id = %s", (competition_name, year, results, id ))
-        conn.commit()
-        return jsonify({"message": "Result changed successfully"}), 200
-
-@app.put('/Rezultatput')
-def put_rezultat():
-        data = request.get_json()
-        id = data.get('id')
-        swim = data.get('swim')
-        division = data.get('division')
-        run = data.get('run')
         name = data.get('name')
-        profession = data.get('profession')
-        country = data.get('country')
-        age = data.get('age')
-        run_distance = data.get('run_distance')
-        bib = data.get('bib')
-        state = data.get('state')
-        bike = data.get('bike')
-        gender_rank = data.get('gender_rank')
-        overall = data.get('overall')
-        swim_distance = data.get('swim_distance')
-        overall_rank = data.get('overall_rank')
-        points = data.get('points')
-        t2 = data.get('t2')
-        bike_distance = data.get('bike_distance')
-        t1 = data.get('t1')
-        div_rank = data.get('div_rank')
+        surname = data.get('surname')
+        birth_date = data.get('birth_date')
+        password = data.get('password')
+        accessible = data.get('accessible')
 
-        cur.execute("UPDATE rezultat SET swim = %s, division = %s, run = %s, name = %s, profession = %s, country = %s, age = %s, run_distance = %s, bib = %s, state = %s, bike = %s, gender_rank = %s, overall = %s, swim_distance = %s, overall_rank = %s, points = %s, t2 = %s, bike_distance = %s, t1 = %s, div_rank = %s WHERE id = %s", (swim, division, run, name, profession, country, age, run_distance, bib, state, bike, gender_rank, overall, swim_distance, overall_rank, points, t2, bike_distance, t1, div_rank, id))
-
+        cur.execute("UPDATE uporabnik SET name = %s, surname = %s, birth_date = %s, password = %s, accessible = %s WHERE id = %s", (name, surname, birth_date, password, accessible, id  ))
         conn.commit()
-        return jsonify({"message": "Result changed successfully"}), 200
+        return jsonify({"message": "Uporabnik changed successfully"}), 200
+#web 10
+
+@app.get("/obvestila/<int:id>")
+def obvestila_get(id):
+    query = "SELECT * FROM obvestilo WHERE user_fk = %s"
+    cur.execute(query, (id,))
+    rows = cur.fetchall()
+    result = []
+    for row in rows:
+         result.append({
+              "title": row[1],
+              "user_tk": row[2],
+              "body": row[3]
+         })
+    return result
+
+
+
 
 if __name__ == '__main__':
     app.run()

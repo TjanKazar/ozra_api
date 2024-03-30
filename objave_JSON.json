@@ -3,6 +3,7 @@
       "title": "Title 1",
       "body": "Content of the first post.",
       "autor": "Author1",
+      "autor_id": 1,
       "upvote": 10,
       "downvote": 2,
       "visible": true
@@ -11,6 +12,7 @@
       "title": "Title 2",
       "body": "Content of the second post.",
       "autor": "Author2",
+      "autor_id": 2,
       "upvote": 5,
       "downvote": 1,
       "visible": false
@@ -19,6 +21,7 @@
       "title": "Title 3",
       "body": "Content of the third post.",
       "autor": "Author3",
+      "autor_id": 3,
       "upvote": 20,
       "downvote": 0,
       "visible": true
@@ -27,6 +30,7 @@
         "title": "Title 4",
         "body": "Content of the fourth post.",
         "autor": "Author4",
+        "autor_id": 4,
         "upvote": 15,
         "downvote": 3,
         "visible": true
@@ -35,6 +39,7 @@
         "title": "Title 5",
         "body": "Content of the fifth post.",
         "autor": "Author5",
+        "autor_id": 5,
         "upvote": 8,
         "downvote": 0,
         "visible": false
@@ -43,6 +48,7 @@
         "title": "Title 6",
         "body": "Content of the sixth post.",
         "autor": "Author6",
+        "autor_id": 6,
         "upvote": 25,
         "downvote": 5,
         "visible": true

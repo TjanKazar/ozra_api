@@ -38,7 +38,7 @@ conn.commit()
 
 uporabnik_insert_query = """INSERT INTO uporabnik 
     (name, surname, birth_date, password, accessible) 
-    VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+    VALUES (%s, %s, %s, %s, %s)"""
 
 for key, value in uporabnik_data.items():
     uporabnik_values = (
