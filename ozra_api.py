@@ -1,10 +1,6 @@
 import py2psql
 import psycopg2
-import json
-import Tekmovanje
-import Rezultat
 from flask import Flask, jsonify, request
-import datetime
 import poslogika
 
 conn = psycopg2.connect(user=py2psql.username,
@@ -15,10 +11,10 @@ conn = psycopg2.connect(user=py2psql.username,
 cur = conn.cursor()
 
 app = Flask("ozraAPI")
-
-#NAMIZNA ADMINISTRATORSKA APLIKACIJA
+#crud
+#NAMIZNA ADMINISTRATORSKA APLIKACIJA 
 #desktop 1
-@app.put('/Tekmovanjeput')
+app.put('/Tekmovanjeput')
 def put_tekmovanje():
         data = request.get_json()
         id = data.get('id')
@@ -371,7 +367,6 @@ def get_rezultat(id):
         }
     return jsonify(result)
 
-
 @app.get('/tekmovalec/<name>')
 def get_porocilo_tekmovalca(name):
     name_parsed = poslogika.convert_to_proper_case(name)
@@ -404,7 +399,6 @@ def get_porocilo_tekmovalca(name):
             "div_rank": row[20]
         })
     return jsonify(result)
-
 
 @app.get('/tekmovalec_best_overall/<name>')
 def get_porocilo_tekmovalca_best_time(name):
@@ -440,7 +434,6 @@ def get_porocilo_tekmovalca_best_time(name):
     data = poslogika.get_shortest_time(result)
 
     return jsonify(data)
-
 
 @app.get('/tekmovalec_swim/<name>')
 def get_porocilo_tekmovalca_tekme_swim(name):
@@ -709,9 +702,6 @@ def obvestila_get(id):
               "body": row[3]
          })
     return result
-
-
-
 
 if __name__ == '__main__':
     app.run()
