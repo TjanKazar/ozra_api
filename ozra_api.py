@@ -1,7 +1,12 @@
 import py2psql
 import psycopg2
+import json
+import Tekmovanje
+import Rezultat
 from flask import Flask, jsonify, request
+import datetime
 import poslogika
+from flask_cors import CORS
 
 conn = psycopg2.connect(user=py2psql.username,
                         password=py2psql.pwd,
@@ -11,10 +16,11 @@ conn = psycopg2.connect(user=py2psql.username,
 cur = conn.cursor()
 
 app = Flask("ozraAPI")
-#crud
-#NAMIZNA ADMINISTRATORSKA APLIKACIJA 
+CORS(app)
+
+#NAMIZNA ADMINISTRATORSKA APLIKACIJA
 #desktop 1
-app.put('/Tekmovanjeput')
+@app.put('/Tekmovanjeput')
 def put_tekmovanje():
         data = request.get_json()
         id = data.get('id')
@@ -274,53 +280,82 @@ def get_porocilo(id):
     cas_plavanja.append(nastopi)
     return jsonify(nastopi)
 
-@app.get('/swimmers/<int:id>')
-def get_bestSwimmers(id):
-    query = "SELECT Rezultat_ID, swim FROM rezultat_tekmovanje JOIN rezultat ON rezultat_tekmovanje.Rezultat_ID = rezultat.ID WHERE Tekmovanje_ID = %s"
-    cur.execute(query, (id,))
+@app.get('/swimmers/<string:name>')
+def get_best_swimmers(name, surname):
+    query = """
+        SELECT rezultat.*
+        FROM rezultat
+        JOIN rezultat_tekmovanje ON rezultat_tekmovanje.Rezultat_ID = rezultat.ID
+        JOIN swimmer ON swimmer.ID = rezultat.Swimmer_ID
+        WHERE swimmer.name = %s AND swimmer.surname = %s
+    """
+    cur.execute(query, (name, surname))
     rows = cur.fetchall()
+
+    if not rows:
+        return jsonify({"error": f"No results found for swimmer with the name {name} {surname}"}), 404
 
     top_swimmer_ids = poslogika.get_top_swimmers(rows)
 
     top_swimmers = []
     for swimmer_id in top_swimmer_ids:
-        query2 = "SELECT * FROM rezultat WHERE id = %s"
+        query2 = "SELECT * FROM rezultat WHERE ID = %s"
         cur.execute(query2, (swimmer_id,))
         top_swimmers.append(cur.fetchone())
 
     return jsonify(top_swimmers)
 
-@app.get('/runners/<int:id>')
-def get_bestRunners(id):
-    query = "SELECT Rezultat_ID, run FROM rezultat_tekmovanje JOIN rezultat ON rezultat_tekmovanje.Rezultat_ID = rezultat.ID WHERE Tekmovanje_ID = %s"
-    cur.execute(query, (id,))
+
+@app.get('/runners/<string:name>/<string:surname>')
+def get_best_runners(name, surname):
+
+    full_name = name.capitalize() + " " + surname.capitalize()
+    # First, find the competitors with the given name and surname in the rezultat table
+    query = """
+    SELECT rezultat_tekmovanje.Rezultat_ID, rezultat.run
+    FROM rezultat_tekmovanje
+    JOIN rezultat ON rezultat_tekmovanje.Rezultat_ID = rezultat.ID
+    WHERE rezultat.name = %s 
+    """
+    cur.execute(query, (full_name,))
     rows = cur.fetchall()
 
-    top_runner_ids = poslogika.get_top_runners(rows)
+    # Assume poslogika.get_top_runners is defined to get the top runner IDs from the rows
+    top_runner_ids = poslogika.get_shortest_time_run(rows)
 
     top_runners = []
     for runner_id in top_runner_ids:
-        query2 = "SELECT * FROM rezultat WHERE id = %s"
+        query2 = "SELECT * FROM rezultat WHERE ID = %s"
         cur.execute(query2, (runner_id,))
         top_runners.append(cur.fetchone())
 
     return jsonify(top_runners)
 
-@app.get('/bikers/<int:id>')
-def get_bestBikers(id):
-    query = "SELECT Rezultat_ID, bike FROM rezultat_tekmovanje JOIN rezultat ON rezultat_tekmovanje.Rezultat_ID = rezultat.ID WHERE Tekmovanje_ID = %s"
-    cur.execute(query, (id,))
+@app.get('/bikers/<string:name>')
+def get_best_bikers(name, surname):
+    query = """
+        SELECT rezultat.*
+        FROM rezultat
+        JOIN rezultat_tekmovanje ON rezultat_tekmovanje.Rezultat_ID = rezultat.ID
+        JOIN biker ON biker.ID = rezultat.Biker_ID
+        WHERE biker.name = %s AND biker.surname = %s
+    """
+    cur.execute(query, (name, surname))
     rows = cur.fetchall()
+
+    if not rows:
+        return jsonify({"error": f"No results found for biker with the name {name} {surname}"}), 404
 
     top_biker_ids = poslogika.get_top_bikers(rows)
 
     top_bikers = []
     for biker_id in top_biker_ids:
-        query2 = "SELECT * FROM rezultat WHERE id = %s"
+        query2 = "SELECT * FROM rezultat WHERE ID = %s"
         cur.execute(query2, (biker_id,))
         top_bikers.append(cur.fetchone())
 
     return jsonify(top_bikers)
+
 
 @app.get('/tekmovanje/<competition_name>/<year>')
 def get_tekmovanje_name_year(competition_name, year):
@@ -367,6 +402,7 @@ def get_rezultat(id):
         }
     return jsonify(result)
 
+
 @app.get('/tekmovalec/<name>')
 def get_porocilo_tekmovalca(name):
     name_parsed = poslogika.convert_to_proper_case(name)
@@ -399,6 +435,7 @@ def get_porocilo_tekmovalca(name):
             "div_rank": row[20]
         })
     return jsonify(result)
+
 
 @app.get('/tekmovalec_best_overall/<name>')
 def get_porocilo_tekmovalca_best_time(name):
@@ -435,47 +472,18 @@ def get_porocilo_tekmovalca_best_time(name):
 
     return jsonify(data)
 
-@app.get('/tekmovalec_swim/<name>')
-def get_porocilo_tekmovalca_tekme_swim(name):
-    name_parsed = poslogika.convert_to_proper_case(name)
-    query = "SELECT * FROM rezultat WHERE name = %s"
-    cur.execute(query, (name_parsed,))
-    rows = cur.fetchall()
-    result = []
-    for row in rows:
-        result.append({
-            "id": row[0],
-            "swim": row[1],
-            "division": row[2],
-            "run": row[3],
-            "name": row[4],
-            "profession": row[5],
-            "country": row[6],
-            "age": row[7],
-            "run_distance": row[8],
-            "bib": row[9],
-            "state": row[10],
-            "bike": row[11],
-            "gender_rank": row[12],
-            "overall": row[13],
-            "swim_distance": row[14],
-            "overall_rank": row[15],
-            "points": row[16],
-            "t2": row[17],
-            "bike_distance": row[18],
-            "t1": row[19],
-            "div_rank": row[20]
-        })
+
+
 
     data = poslogika.get_shortest_time_swim(result)
 
     return jsonify(data)
 
-@app.get('/tekmovalec_run/<name>')
-def get_porocilo_tekmovalca_tekme_run(name):
-    name_parsed = poslogika.convert_to_proper_case(name)
+@app.get('/tekmovalec_run/<name>/<surname>')
+def get_porocilo_tekmovalca_tekme_run(name, surname):
+    full_name = name.capitalize() + " " + surname.capitalize()
     query = "SELECT * FROM rezultat WHERE name = %s"
-    cur.execute(query, (name_parsed,))
+    cur.execute(query, (full_name,))
     rows = cur.fetchall()
     result = []
     for row in rows:
@@ -507,11 +515,11 @@ def get_porocilo_tekmovalca_tekme_run(name):
 
     return jsonify(data)
 
-@app.get('/tekmovalec_bike/<name>')
-def get_porocilo_tekmovalca_tekme_bike(name):
-    name_parsed = poslogika.convert_to_proper_case(name)
+@app.get('/tekmovalec_bike/<name>/<surname>')
+def get_porocilo_tekmovalca_tekme_bike(name, surname):
+    full_name = name.capitalize() + " " + surname.capitalize()
     query = "SELECT * FROM rezultat WHERE name = %s"
-    cur.execute(query, (name_parsed,))
+    cur.execute(query, (full_name,))
     rows = cur.fetchall()
     result = []
     for row in rows:
@@ -539,6 +547,45 @@ def get_porocilo_tekmovalca_tekme_bike(name):
             "div_rank": row[20]
         })
 
+    data = poslogika.get_shortest_time_bike(result)
+
+    return jsonify(data)
+
+@app.get('/tekmovalec_swim/<name>/<surname>')
+def get_porocilo_tekmovalca_tekme_swim(name, surname):
+    full_name = name.capitalize() + " " + surname.capitalize()
+    query = "SELECT * FROM rezultat WHERE name = %s"
+    cur.execute(query, (full_name,))
+    rows = cur.fetchall()
+    result = []
+    for row in rows:
+        result.append({
+            "id": row[0],
+            "swim": row[1],
+            "division": row[2],
+            "run": row[3],
+            "name": row[4],
+            "profession": row[5],
+            "country": row[6],
+            "age": row[7],
+            "run_distance": row[8],
+            "bib": row[9],
+            "state": row[10],
+            "bike": row[11],
+            "gender_rank": row[12],
+            "overall": row[13],
+            "swim_distance": row[14],
+            "overall_rank": row[15],
+            "points": row[16],
+            "t2": row[17],
+            "bike_distance": row[18],
+            "t1": row[19],
+            "div_rank": row[20]
+        })
+
+    data = poslogika.get_shortest_time_swim(result)
+
+    return jsonify(data)
 #desktop 9
 @app.put('/change_access')
 def change_access():
@@ -604,6 +651,7 @@ def objave_get_one(id):
 #web 5
 @app.post('/objavapost')
 def post_objava():
+      
       data = request.get_json()
       title = data.get('title')
       body = data.get('body')
@@ -675,18 +723,24 @@ def objava_delete(id):
 
 #web 9
      
-@app.put('/uporabnik/<int:id>')
-def put_uporabnik(id):
-        data = request.get_json()
-        name = data.get('name')
-        surname = data.get('surname')
-        birth_date = data.get('birth_date')
-        password = data.get('password')
-        accessible = data.get('accessible')
+@app.get('/uporabnik/<string:name>/<string:password>')
+def get_uporabnik(name, password):
+    # Query to find the first user with the given name and password
+    cur.execute("SELECT * FROM uporabnik WHERE name = %s AND password = %s LIMIT 1", (name, password))
+    user = cur.fetchone()
 
-        cur.execute("UPDATE uporabnik SET name = %s, surname = %s, birth_date = %s, password = %s, accessible = %s WHERE id = %s", (name, surname, birth_date, password, accessible, id  ))
-        conn.commit()
-        return jsonify({"message": "Uporabnik changed successfully"}), 200
+    if user:
+        user_data = {
+            "id": user[0],
+            "name": user[1],
+            "surname": user[2],
+            "birth_date": user[3],
+            "password": user[4],
+            "accessible": user[5]
+        }
+        return jsonify(user_data), 200
+    else:
+        return jsonify({"message": "User not found"}), 404
 #web 10
 
 @app.get("/obvestila/<int:id>")

@@ -32,13 +32,14 @@ create_uporabnik_table = '''CREATE TABLE uporabnik
     surname                 TEXT,
     birth_date              TEXT,
     password                TEXT,
-    accessible              BOOLEAN); '''
+    accessible              BOOLEAN,
+    admin                   BOOLEAN); '''
 cur.execute(create_uporabnik_table)
 conn.commit()
 
 uporabnik_insert_query = """INSERT INTO uporabnik 
-    (name, surname, birth_date, password, accessible) 
-    VALUES (%s, %s, %s, %s, %s)"""
+    (name, surname, birth_date, password, accessible, admin) 
+    VALUES (%s, %s, %s, %s, %s, %s)"""
 
 for key, value in uporabnik_data.items():
     uporabnik_values = (
@@ -47,9 +48,12 @@ for key, value in uporabnik_data.items():
         value["birth_date"],
         value["password"],
         value["accessible"],
+        value["admin"],
+
     )
     cur.execute(uporabnik_insert_query, uporabnik_values)
     conn.commit()
+
 
 zacetek = time.time()
 zacetekDatetime = datetime.fromtimestamp(zacetek).strftime('%Y-%m-%d %H:%M:%S')
